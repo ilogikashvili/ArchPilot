@@ -1,0 +1,7 @@
+package com.ilia.gikashvili.archmain.notification.service;
+import java.util.*; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import com.ilia.gikashvili.archmain.notification.entity.Notification; import com.ilia.gikashvili.archmain.notification.repository.NotificationRepository; import com.ilia.gikashvili.archmain.common.exception.NotFoundException;
+@Service public class NotificationService { private final NotificationRepository repo; private final com.ilia.gikashvili.archmain.user.repository.UserRepository users;public NotificationService(NotificationRepository repo,com.ilia.gikashvili.archmain.user.repository.UserRepository users){this.repo=repo;this.users=users;}
+ @Transactional public Notification notify(UUID userId,String type,String title,String body,String link){if(!users.existsById(userId))throw new NotFoundException("User",userId);var n=new Notification();n.setUserId(userId);n.setType(type);n.setTitle(title);n.setBody(body);n.setLink(link);return repo.save(n);}
+ @Transactional public Notification mark(UUID uid,UUID id,boolean read){var n=owned(uid,id);n.setRead(read);return repo.save(n);} public Notification owned(UUID uid,UUID id){return repo.findByIdAndUserId(id,uid).orElseThrow(()->new NotFoundException("Notification",id));}
+ @Transactional public void all(UUID uid){repo.findByUserIdAndReadFalse(uid).forEach(n->{n.setRead(true);repo.save(n);});}
+}

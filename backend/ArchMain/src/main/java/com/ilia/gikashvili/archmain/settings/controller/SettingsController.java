@@ -1,0 +1,12 @@
+package com.ilia.gikashvili.archmain.settings.controller;
+import java.util.*; import org.springframework.web.bind.annotation.*; import com.ilia.gikashvili.archmain.security.*; import com.ilia.gikashvili.archmain.settings.repository.*; import com.ilia.gikashvili.archmain.settings.entity.*; import com.ilia.gikashvili.archmain.settings.service.*; import com.ilia.gikashvili.archmain.common.exception.NotFoundException;
+@RestController @RequestMapping(com.ilia.gikashvili.archmain.common.api.ApiVersion.V1+"/users/me") public class SettingsController {private final PreferencesService preferences;private final UserSessionRepository sessions;private final ConnectedAccountRepository accounts;public SettingsController(PreferencesService p,UserSessionRepository s,ConnectedAccountRepository a){preferences=p;sessions=s;accounts=a;}
+@GetMapping("/preferences") public Map<String,Object> get(@CurrentUser AuthenticatedUser u){return preferences.get(u.id());}
+@PatchMapping("/preferences") public Map<String,Object> patch(@CurrentUser AuthenticatedUser u,@RequestBody Map<String,Object> b){return preferences.patch(u.id(),b,false);}
+@PatchMapping("/notification-preferences") public Map<String,Object> notifications(@CurrentUser AuthenticatedUser u,@RequestBody Map<String,Object> b){return preferences.patch(u.id(),b,true);}
+public record SessionView(UUID id,String userAgent,String ip,java.time.Instant createdAt,java.time.Instant lastSeenAt,boolean revoked){}
+@GetMapping("/sessions") public List<SessionView> sessions(@CurrentUser AuthenticatedUser u){return sessions.findAllByUserId(u.id()).stream().map(s->new SessionView(s.getId(),s.getUserAgent(),s.getIp(),s.getCreatedAt(),s.getLastSeenAt(),s.getRevoked())).toList();}
+@DeleteMapping("/sessions/{id}") @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT) public void revoke(@CurrentUser AuthenticatedUser u,@PathVariable UUID id){var s=sessions.findByIdAndUserId(id,u.id()).orElseThrow(()->new NotFoundException("Session",id));s.setRevoked(true);sessions.save(s);}
+@GetMapping("/connected-accounts") public List<ConnectedAccount> accounts(@CurrentUser AuthenticatedUser u){return accounts.findAllByUserId(u.id());}
+@DeleteMapping("/connected-accounts/{provider}") @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT) public void disconnect(@CurrentUser AuthenticatedUser u,@PathVariable String provider){var a=accounts.findByUserIdAndProvider(u.id(),provider).orElseThrow(()->new NotFoundException("Connected account not found"));accounts.delete(a);}
+}

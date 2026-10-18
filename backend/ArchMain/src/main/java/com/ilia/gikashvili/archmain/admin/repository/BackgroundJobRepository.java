@@ -1,0 +1,1 @@
+package com.ilia.gikashvili.archmain.admin.repository; import java.util.*; import org.springframework.data.jpa.repository.*; import org.springframework.data.domain.*; import com.ilia.gikashvili.archmain.admin.entity.BackgroundJob; public interface BackgroundJobRepository extends JpaRepository<BackgroundJob,UUID>{}

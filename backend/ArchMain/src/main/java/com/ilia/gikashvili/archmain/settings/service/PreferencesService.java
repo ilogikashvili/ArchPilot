@@ -1,0 +1,5 @@
+package com.ilia.gikashvili.archmain.settings.service;
+import java.util.*; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import com.ilia.gikashvili.archmain.settings.repository.UserPreferencesRepository; import com.ilia.gikashvili.archmain.settings.entity.UserPreferences;
+@Service public class PreferencesService {private final UserPreferencesRepository repo; public PreferencesService(UserPreferencesRepository r){repo=r;}
+public Map<String,Object> get(UUID uid){return repo.findByUserId(uid).map(UserPreferences::getPreferences).orElse(Map.of());}
+@Transactional public Map<String,Object> patch(UUID uid,Map<String,Object> patch,boolean notification){var e=repo.findByUserId(uid).orElseGet(()->{var n=new UserPreferences();n.setUserId(uid);n.setPreferences(new HashMap<>());n.setNotificationPreferences(new HashMap<>());return n;});var map=new HashMap<String,Object>(notification?e.getNotificationPreferences():e.getPreferences());patch.forEach((k,v)->{if(v==null)map.remove(k);else map.put(k,v);});if(notification)e.setNotificationPreferences(map);else e.setPreferences(map);repo.save(e);return map;}}

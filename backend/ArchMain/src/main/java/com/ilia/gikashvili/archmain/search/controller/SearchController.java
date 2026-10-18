@@ -1,0 +1,3 @@
+package com.ilia.gikashvili.archmain.search.controller;
+import java.util.*;import org.springframework.web.bind.annotation.*;import com.ilia.gikashvili.archmain.security.*;import com.ilia.gikashvili.archmain.search.service.SearchService;
+@RestController @RequestMapping(com.ilia.gikashvili.archmain.common.api.ApiVersion.V1) public class SearchController {private final SearchService service;public SearchController(SearchService s){service=s;}@GetMapping("/search") public Object global(@CurrentUser AuthenticatedUser u,@RequestParam String q){return service.global(u.id(),q);}@GetMapping("/projects/{pid}/search") public Object project(@CurrentUser AuthenticatedUser u,@PathVariable UUID pid,@RequestParam String q){return service.project(u.id(),pid,q);}}

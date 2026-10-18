@@ -1,0 +1,1 @@
+package com.ilia.gikashvili.archmain.settings.repository; import java.util.*; import org.springframework.data.jpa.repository.*; import org.springframework.data.domain.*; import com.ilia.gikashvili.archmain.settings.entity.UserPreferences; public interface UserPreferencesRepository extends JpaRepository<UserPreferences,UUID>{Optional<UserPreferences> findByUserId(UUID uid);}
